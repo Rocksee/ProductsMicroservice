@@ -20,7 +20,7 @@ public class ProductServiceImpl implements ProductService {
         this.kafkaTemplate = kafkaTemplate;
     }
     @Override
-    public String createProduct(CreatedProductRestModel productRestModel) {
+    public String createProduct(CreatedProductRestModel productRestModel) throws Exception{
 
         String productID = UUID.randomUUID().toString();
 
@@ -29,17 +29,27 @@ public class ProductServiceImpl implements ProductService {
         ProductCreatedEvent productCreatedEvent = new ProductCreatedEvent(productRestModel.getTitle(), productRestModel.getPrice(),
                 productRestModel.getQuantity(),productID);
 
-        CompletableFuture<SendResult<String, ProductCreatedEvent>> future =
-                kafkaTemplate.send("product-created-event-topic", productID, productCreatedEvent);
-        future.whenComplete((result, exception) -> {
-            if (exception != null) {
-                LOGGER.error("Failed to send the message: " + exception.getMessage());
-            } else {
-                LOGGER.info("Successfully sent the message: " + result.getRecordMetadata());
-            }
-        });
+        LOGGER.info("Before publishing a ProductCreatedEvent");
+        SendResult<String, ProductCreatedEvent> result = kafkaTemplate
+                .send("product-created-event-topic", productID, productCreatedEvent)
+                .get();
+
+        // *** Use completable future if you want it to be async
+//        CompletableFuture<SendResult<String, ProductCreatedEvent>> future =
+//                kafkaTemplate.send("product-created-event-topic", productID, productCreatedEvent);
+//        future.whenComplete((result, exception) -> {
+//            if (exception != null) {
+//                LOGGER.error("Failed to send the message: " + exception.getMessage());
+//            } else {
+//                LOGGER.info("Successfully sent the message: " + result.getRecordMetadata());
+//            }
+//        });
         //if you want to wait for async operation to complete and block the current thread (so it will become synchronous)
-        future.join();
+//        future.join();
+        LOGGER.info("Get Partition Info: " + result.getRecordMetadata().partition());
+        LOGGER.info("Topic: " + result.getRecordMetadata().topic());
+        LOGGER.info("Offset: " + result.getRecordMetadata().offset());
+        LOGGER.info("************* Returning product ID");
         return productID;
     }
 }
