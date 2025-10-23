@@ -31,9 +31,9 @@ public class ProductServiceImpl implements ProductService {
 
         LOGGER.info("Before publishing a ProductCreatedEvent");
         SendResult<String, ProductCreatedEvent> result = kafkaTemplate
-                .send("product-created-event-topic", productID, productCreatedEvent)
+                .send("topic2", productID, productCreatedEvent)
                 .get();
-
+//product-created-event-topic
         // *** Use completable future if you want it to be async
 //        CompletableFuture<SendResult<String, ProductCreatedEvent>> future =
 //                kafkaTemplate.send("product-created-event-topic", productID, productCreatedEvent);
