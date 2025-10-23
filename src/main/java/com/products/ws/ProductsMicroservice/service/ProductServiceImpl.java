@@ -1,6 +1,7 @@
 package com.products.ws.ProductsMicroservice.service;
 
 import com.products.ws.ProductsMicroservice.rest.CreatedProductRestModel;
+import com.products.ws.core.ProductCreatedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.support.SendResult;
@@ -31,7 +32,7 @@ public class ProductServiceImpl implements ProductService {
 
         LOGGER.info("Before publishing a ProductCreatedEvent");
         SendResult<String, ProductCreatedEvent> result = kafkaTemplate
-                .send("topic2", productID, productCreatedEvent)
+                .send("product-created-event-topic", productID, productCreatedEvent)
                 .get();
 //product-created-event-topic
         // *** Use completable future if you want it to be async
